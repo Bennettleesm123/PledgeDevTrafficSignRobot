@@ -35,10 +35,6 @@ import time
 import sys
 import argparse
 
-
-# ─────────────────────────────────────────────────────────
-# Serial Protocol (matches the Arduino sketch exactly)
-# ─────────────────────────────────────────────────────────
 COMMANDS = {
     "forward":  "F",
     "backward": "B",
@@ -48,7 +44,7 @@ COMMANDS = {
 }
 
 BAUD_RATE    = 9600
-STARTUP_WAIT = 2.0   # seconds – Arduino resets on serial connect; wait for it
+STARTUP_WAIT = 2.0  
 
 
 class RobotController:
@@ -67,7 +63,7 @@ class RobotController:
         self.port = port
         try:
             self.ser = serial.Serial(port, baud, timeout=timeout)
-            time.sleep(STARTUP_WAIT)          # wait for Arduino to boot
+            time.sleep(STARTUP_WAIT)     
             self._flush_startup()
             print(f"[Robot] Connected on {port} at {baud} baud.")
         except serial.SerialException as e:
@@ -90,7 +86,7 @@ class RobotController:
             print("[Robot] Serial port not open!")
             return ""
         self.ser.write(char.encode())
-        time.sleep(0.05)   # small delay so Arduino can respond
+        time.sleep(0.05)  
         response = ""
         while self.ser.in_waiting:
             response = self.ser.readline().decode("utf-8", errors="ignore").strip()
@@ -123,10 +119,6 @@ class RobotController:
             self.ser.close()
             print("[Robot] Serial port closed.")
 
-
-# ─────────────────────────────────────────────────────────
-# Safety Fail-safe context manager
-# ─────────────────────────────────────────────────────────
 class SafeRobot:
     """
     Use as a context manager so the robot always stops, even on crash.
@@ -152,20 +144,15 @@ class SafeRobot:
             print(f"[SafeRobot] Stopped due to exception: {exc_val}")
         return False   # don't suppress exceptions
 
-
-# ─────────────────────────────────────────────────────────
-# Manual keyboard control (run directly for testing)
-# ─────────────────────────────────────────────────────────
 def keyboard_control(port: str):
     """
-    Simple WASD / arrow-key terminal interface to manually test the robot.
-    Uses 'keyboard' library if available, otherwise falls back to input().
+    Simple WASD to manually test the robot. like gaming type shi
     """
     print("\n── Manual Control Mode ──────────────────────────────")
-    print("  W / F = Forward    S / S = Stop")
-    print("  A / L = Left       D / R = Right")
-    print("  X / B = Backward")
-    print("  Q     = Quit")
+    print("  W = Forward    P = Stop")
+    print("  A = Left       D = Right")
+    print("  S = Backward")
+    print("  Q = Quit")
     print("─────────────────────────────────────────────────────\n")
 
     with SafeRobot(port) as robot:
@@ -181,15 +168,15 @@ def keyboard_control(port: str):
 
             key = raw[0]
 
-            if key in ("W", "F"):
+            if key in ("W"):
                 robot.forward()
-            elif key in ("X", "B"):
+            elif key in ("S"):
                 robot.backward()
-            elif key in ("A", "L"):
+            elif key in ("A"):
                 robot.left()
-            elif key in ("D", "R"):
+            elif key in ("D"):
                 robot.right()
-            elif key in ("S", " "):
+            elif key in ("P"):
                 robot.stop()
             elif key == "Q":
                 print("[Control] Quitting.")
@@ -197,10 +184,6 @@ def keyboard_control(port: str):
             else:
                 print(f"[Control] Unknown key: '{key}'")
 
-
-# ─────────────────────────────────────────────────────────
-# Demo: send a '1' (maps to Forward) as described in Milestone 2
-# ─────────────────────────────────────────────────────────
 def milestone2_demo(port: str):
     """
     Demonstrates the milestone requirement:
